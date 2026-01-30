@@ -13,8 +13,21 @@ class Gate(models.Model):
 
 class Trip(models.Model):
     trip_id = models.AutoField(primary_key=True)
-    vehicle = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    vehicle = models.ForeignKey('vehicles.Vehicle', on_delete=models.CASCADE)
     gate = models.ForeignKey(Gate, on_delete=models.CASCADE)
     trip_time = models.DateTimeField(auto_now_add=True)
     fare_amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, default='Pending') # Paid, Unpaid
+
+    def calculate_fare(self):
+        base_fares = {
+            'car': 5.00,
+            'truck': 10.00,
+            'motorcycle': 3.00,
+        }
+        return base_fares.get(self.vehicle.vehicle_type, 5.00)  # Default to car fare
+
+    def save(self, *args, **kwargs):
+        if not self.fare_amount:  # Only calculate if not set
+            self.fare_amount = self.calculate_fare()
+        super().save(*args, **kwargs)
