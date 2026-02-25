@@ -1,9 +1,12 @@
-from django.urls import path
-from django.http import HttpResponse
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from . import views
 
-def vehicles_home(request):
-    return HttpResponse("Vehicles Home")
+app_name = 'vehicles'
+
+router = DefaultRouter()
+router.register(r'', views.VehicleViewSet, basename='vehicle')
 
 urlpatterns = [
-    path('', vehicles_home, name='vehicles-home'),
+    path('', include(router.urls)),
 ]
